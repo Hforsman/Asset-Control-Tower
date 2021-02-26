@@ -3,6 +3,7 @@ import gzip
 from io import BytesIO
 import os
 import shutil
+from typing import List
 
 import pandas as pd
 import requests
@@ -48,7 +49,7 @@ def download_and_save_gzip_from_url(source: str, destination: str):
         print(f"Provided source {source} is not a gzipped archive. Source not downloaded.")
 
 
-def read_data_into_list():
+def read_data_into_list(source: str):
     data_list = list()
     with open("data/vehicle.csv0001_part_00", "rb") as f:
         reader = csv.reader(f, quotechar='"', delimiter=',', quoting=csv.QUOTE_ALL, skipinitialspace=True)
@@ -58,7 +59,15 @@ def read_data_into_list():
             data_list.append(row)
 
 
-def fix_short_row(row: list):
+
+def fix_short_row(row: List[str]) -> List[str]:
+    """
+    All short rows (less than 36 fields) contain an extra " in a field value. This is either due to typos in the colour
+    field (example: Pure White",sedan") or because of wheel sizes in inches in the type field (example: 1.5d N-TEC 17")
+
+    :param row: a list containing less than 36 items
+    :return: A list containing 36 items
+    """
     new_row = list()
     for item in row:
         new_row.extend(item.split(','))
