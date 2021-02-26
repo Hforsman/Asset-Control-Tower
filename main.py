@@ -53,12 +53,17 @@ def download_and_save_gzip_from_url(source: str, destination: str):
 
 def read_data_into_list(source: str):
     data_list = list()
-    with open("data/vehicle.csv0001_part_00", "rb") as f:
+    long_rows = list()
+    short_rows = list()
+    with open(source, "r") as f:
         reader = csv.reader(f, quotechar='"', delimiter=',', quoting=csv.QUOTE_ALL, skipinitialspace=True)
         for row in reader:
             if len(row) < 36:
-                row = fix_short_row(row=row)
-            data_list.append(row)
+                short_rows.append(row)
+            elif len(row) > 36:
+                long_rows.append(row)
+            else:
+                data_list.append(row)
 
     # TODO: pass lists onto function to dump into database
     # TODO: put long_rows into database as is
@@ -77,7 +82,7 @@ def fix_short_row(row: List[str]) -> List[str]:
     """
     new_row = list()
     for item in row:
-        new_row.extend(item.split(','))
+        new_row.extend(item.split('",'))
     return new_row
 
 
@@ -86,3 +91,7 @@ if __name__ == '__main__':
     # Download, extract and save the data files to disk
     for file in constants.FILES:
         download_and_save_gzip_from_url(source=file, destination="data")
+
+    # Read in data
+    for file in os.listdir("data"):
+        read_data_into_list(source=os.path.join("data", file))
