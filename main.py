@@ -36,8 +36,10 @@ def download_and_save_gzip_from_url(source: str, destination: str):
 
     mkdir(directory=destination)
 
+    # Get header to check file type
     h = requests.head(source)
     if h.headers.get("content-type") == "application/x-gzip":
+        # Download file if it is a gzip file
         r = requests.get(source)
         target_filename = os.path.join(destination, source.rsplit("/", 1)[1]).rsplit(".", 1)[0]
         with gzip.open(BytesIO(r.content), "rb") as f_in:
@@ -58,6 +60,11 @@ def read_data_into_list(source: str):
                 row = fix_short_row(row=row)
             data_list.append(row)
 
+    # TODO: pass lists onto function to dump into database
+    # TODO: put long_rows into database as is
+    # TODO: remove short_rows and replace with fix_short_rows
+    # TODO: further sanitize data_list rows; starting with build_year
+    # TODO: build_year > 2020; build_year < 1980; build_year != ^\d{4}$; then parse from firstuse
 
 
 def fix_short_row(row: List[str]) -> List[str]:
@@ -75,7 +82,7 @@ def fix_short_row(row: List[str]) -> List[str]:
 
 
 if __name__ == '__main__':
-
+    # TODO: put "data" in constants.py
+    # Download, extract and save the data files to disk
     for file in constants.FILES:
-        # Download, extract and save the files to disk
         download_and_save_gzip_from_url(source=file, destination="data")
