@@ -1,4 +1,9 @@
+from typing import Any
 import os
+
+import sqlalchemy
+
+import constants
 
 
 def mkdir(directory: str):
@@ -15,3 +20,13 @@ def mkdir(directory: str):
         print(f"Created directory {directory}")
 
 
+def get_mysql_engine() -> Any:
+    db_user = constants.CONFIG.get('user')
+    db_pwd = constants.CONFIG.get('password')
+    db_host = constants.CONFIG.get('host')
+    db_port = constants.CONFIG.get('port')
+    db_name = constants.CONFIG.get('database')
+
+    conn_string = f"mysql+pymysql://{db_user}:{db_pwd}@{db_host}:{db_port}/{db_name}"
+
+    return sqlalchemy.create_engine(conn_string)
