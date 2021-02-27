@@ -14,4 +14,3 @@ CONFIG = {
     'password': 'McQueen95',
     'database': 'ACT'
 }
-
