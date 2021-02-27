@@ -9,6 +9,7 @@ import pandas as pd
 import requests
 
 import constants
+import database
 import utils
 
 
@@ -77,6 +78,9 @@ if __name__ == '__main__':
     # Download, extract and save the data files to disk
     for file in constants.FILES:
         download_and_save_gzip_from_url(source=file, destination="data")
+
+    # initialize database
+    database.initialize_database()
 
     # Read in data
     for file in os.listdir("data"):
