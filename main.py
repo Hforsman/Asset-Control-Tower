@@ -9,20 +9,7 @@ import pandas as pd
 import requests
 
 import constants
-
-
-def mkdir(directory: str):
-    """
-    Create a requested directory in the current project if that directory does not exist yet
-
-    :param directory: Name of the
-    :return: None
-    """
-    if os.path.exists(directory):
-        print(f"Directory '{directory}' already exists, skipping mkdir")
-    else:
-        os.mkdir(directory)
-        print(f"Created directory {directory}")
+import utils
 
 
 def download_and_save_gzip_from_url(source: str, destination: str):
@@ -34,7 +21,7 @@ def download_and_save_gzip_from_url(source: str, destination: str):
     :return: The name of the
     """
 
-    mkdir(directory=destination)
+    utils.mkdir(directory=destination)
 
     # Get header to check file type
     h = requests.head(source)
