@@ -54,12 +54,11 @@ def download_and_save_gzip_from_url(source: str, destination: str):
 def read_data_into_list(source: str):
     data_list = list()
     long_rows = list()
-    short_rows = list()
     with open(source, "r") as f:
         reader = csv.reader(f, quotechar='"', delimiter=',', quoting=csv.QUOTE_ALL, skipinitialspace=True)
         for row in reader:
             if len(row) < 36:
-                short_rows.append(row)
+                data_list.append(fix_short_row(row))
             elif len(row) > 36:
                 long_rows.append(row)
             else:
