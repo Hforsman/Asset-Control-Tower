@@ -98,7 +98,7 @@ def split_into_long_and_normal_lists(data_list: List[List[str]], mater: List[Lis
     return mater, vehicles
 
 
-def insert_into_table(data_list: List[List[str]], table: Type[database.declarative_base()], engine: Any) -> None:
+def insert_into_table(data_list: List[List[str]], table: Type[database.declarative_base], engine: Any) -> None:
     print(f"Transform data for {table.__table__.name} into dataframe")
 
     df = pd.DataFrame(data=data_list, columns=inspect(table).columns.keys())
@@ -130,9 +130,9 @@ if __name__ == '__main__':
     vehicle_table = database.Vehicle
     mater_table = database.Mater
 
-    # Read csv files into database
-    mater = list()
-    vehicles = list()
+    # Read csv files into lists
+    mater: List[List[str]] = list()
+    vehicles: List[List[str]] = list()
     for file in os.listdir(constants.DATA_FOLDER):  # ['vehicle.csv0002_part_00']:
         file_vehicle_list = read_data_from_csv(source=os.path.join(constants.DATA_FOLDER, file))
         mater, vehicles = split_into_long_and_normal_lists(file_vehicle_list, mater, vehicles)
