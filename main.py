@@ -137,5 +137,6 @@ if __name__ == '__main__':
         file_vehicle_list = read_data_from_csv(source=os.path.join(constants.DATA_FOLDER, file))
         mater, vehicles = split_into_long_and_normal_lists(file_vehicle_list, mater, vehicles)
 
+    # Load data lists into database tables
     insert_into_table(data_list=vehicles, table=vehicle_table, engine=engine)
     insert_into_table(data_list=mater, table=mater_table, engine=engine)
