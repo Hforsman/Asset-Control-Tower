@@ -1,7 +1,7 @@
-from sqlalchemy import Column, String, PrimaryKeyConstraint
-from sqlalchemy.ext.declarative import declarative_base
+from typing import Any
 
-import utils
+from sqlalchemy import Column, inspect, PrimaryKeyConstraint, String
+from sqlalchemy.ext.declarative import declarative_base
 
 
 class Vehicle(declarative_base()):
@@ -105,9 +105,13 @@ class PistonCup(declarative_base()):
     amount_damage = Column(String(255))
 
 
-def initialize_database():
-    engine = utils.get_mysql_engine()
-
+def initialize_database(engine: Any) -> None:
     Vehicle.__table__.create(bind=engine, checkfirst=True)
     Mater.__table__.create(bind=engine, checkfirst=True)
     PistonCup.__table__.create(bind=engine, checkfirst=True)
+
+
+def is_initialized(engine: Any) -> bool:
+    table_names = inspect(engine).get_table_names()
+    is_empty = table_names == []
+    return not is_empty

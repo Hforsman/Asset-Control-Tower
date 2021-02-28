@@ -20,13 +20,15 @@ def mkdir(directory: str):
         print(f"Created directory {directory}")
 
 
-def get_mysql_engine() -> Any:
+def get_db_engine() -> Any:
+    db_type = constants.CONFIG.get('type')
+    db_driver = constants.CONFIG.get("driver")
     db_user = constants.CONFIG.get('user')
     db_pwd = constants.CONFIG.get('password')
     db_host = constants.CONFIG.get('host')
     db_port = constants.CONFIG.get('port')
     db_name = constants.CONFIG.get('database')
 
-    conn_string = f"mysql+pymysql://{db_user}:{db_pwd}@{db_host}:{db_port}/{db_name}"
+    conn_string = f"{db_type}+{db_driver}://{db_user}:{db_pwd}@{db_host}:{db_port}/{db_name}"
 
     return sqlalchemy.create_engine(conn_string)

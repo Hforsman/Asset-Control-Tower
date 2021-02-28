@@ -34,3 +34,7 @@ create_database: ## Spin up mysql docker and initialize database
 remove_container: ## Stop the running container and remove it
 	@docker stop $(CONTAINER_NAME)
 	@docker container rm $(CONTAINER_NAME)
+
+.PHONY: docker_start_db
+docker_start_db: ## Start a stopped db container
+	@docker start $(CONTAINER_NAME)
