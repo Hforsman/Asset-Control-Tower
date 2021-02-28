@@ -1,6 +1,6 @@
 from typing import Any
 
-from sqlalchemy import Column, inspect, PrimaryKeyConstraint, String
+from sqlalchemy import Column, inspect, Integer, PrimaryKeyConstraint, String
 from sqlalchemy.ext.declarative import declarative_base
 
 
@@ -103,12 +103,25 @@ class PistonCup(declarative_base()):
     make = Column(String(255))
     model = Column(String(255))
     amount_damage = Column(String(255))
+    rank = Column(Integer)
+
+
+class WeirdYears(declarative_base()):
+    __tablename__ = 'weirdyears'
+    __table_args__ = (
+        PrimaryKeyConstraint('country', 'make', 'model'),
+    )
+    country = Column(String(4))
+    make = Column(String(255))
+    model = Column(String(255))
+    build_year = Column(String(255))
 
 
 def initialize_database(engine: Any) -> None:
     Vehicle.__table__.create(bind=engine, checkfirst=True)
     Mater.__table__.create(bind=engine, checkfirst=True)
     PistonCup.__table__.create(bind=engine, checkfirst=True)
+    WeirdYears.__table__.create(bind=engine, checkfirst=True)
 
 
 def is_initialized(engine: Any) -> bool:
