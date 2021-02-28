@@ -120,8 +120,8 @@ def insert_into_table(data_list: List[List[str]], table: Type[database.declarati
 
 if __name__ == '__main__':
     # Download, extract and save the data files to disk
-    # for file in constants.FILES:
-    #     download_and_save_gzip_from_url(source=file, destination=constants.DATA_FOLDER)
+    for file in constants.FILES:
+        download_and_save_gzip_from_url(source=file, destination=constants.DATA_FOLDER)
 
     # initialize objects to talk to database
     engine = utils.get_db_engine()
