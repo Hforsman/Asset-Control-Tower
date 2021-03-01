@@ -16,6 +16,9 @@ venv: ## Create a venv to work in
 test: ## Run Python tests
 	echo "test"
 
+.PHONY: first_run
+first_run: venv pull_mysql_docker create_database ## Set up the environment
+
 .PHONY: pull_mysql_docker
 pull_mysql_docker: ## Pull the mysql docker from docker hub
 	@docker pull mysql
