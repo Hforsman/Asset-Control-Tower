@@ -1,5 +1,6 @@
 PIP := venv/bin/pip
 PYTHON := venv/bin/python
+NETWORK := la_international_speedway
 CONTAINER_NAME := rust_eze
 CONTAINER_PORT := 3306
 DB_NAME := ACT
@@ -23,9 +24,14 @@ first_run: venv pull_mysql_docker create_database ## Set up the environment
 pull_mysql_docker: ## Pull the mysql docker from docker hub
 	@docker pull mysql
 
+.PHONY: docker_network
+docker_network: ## Create a custom network to connect mysql command line client against mysql database docker
+	@docker network create -d bridge $(NETWORK)
+
 .PHONY: create_database
 create_database: ## Spin up mysql docker and initialize database
 	@docker run --name=$(CONTAINER_NAME) \
+	--network=$(NETWORK) \
 	-e MYSQL_ROOT_PASSWORD=admin \
 	-e MYSQL_DATABASE=$(DB_NAME) \
 	-e MYSQL_USER=$(DB_USER) \
