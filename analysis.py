@@ -10,7 +10,6 @@ import database
 import utils
 
 
-# TODO: sanitize build_year
 # TODO: sanitize make
 # TODO: sanitize model
 
@@ -51,12 +50,14 @@ def create_topx_query(session: Type[sessionmaker],
     return top_10
 
 
-def sanitize_build_year(session: Type[sessionmaker],
-                        table: Type[database.declarative_base] = database.Vehicle,) -> None:
-
-    # TODO: build_year > 2020; build_year < 1980; then parse from firstuse
-
-    return None
+def sanitize_build_year(table: Type[database.declarative_base] = database.Vehicle,) -> sa.sql.Update:
+    stmt = sa.update(table).prefix_with("IGNORE").where(sa.or_(
+        sa.cast(table.build_year, sa.Integer) < constants.MIN_YEAR,
+        sa.cast(table.build_year, sa.Integer) > constants.MAX_YEAR)
+    ).values(
+        build_year=sa.cast(sa.extract('year', sa.cast(table.firstuse, sa.Date)), sa.String)
+    )
+    return stmt
 
 
 def save_weird_years(source_table: Type[database.declarative_base] = database.Vehicle,
@@ -65,20 +66,22 @@ def save_weird_years(source_table: Type[database.declarative_base] = database.Ve
     Using sqlalchemy Core because ORM does not have a satisfying solution for INSERT INTO ... SELECT FROM.
     This function generates the statement to insert weird build_years with accompanying primary keys to a
     separate table.
+    The `prefix_with("IGNORE")` is to run the query even though some strings cannot be converted to integers.
+    The result is still as expected.
 
     :param source_table: Main table where all unsanitized data is stored, is. vehicles
     :param destination_table: Table to save entries with weird years for later analysis
     :return: insert statement object that can be executed against the database
     """
 
-    stmt = destination_table.__table__.insert().from_select(
+    stmt = sa.insert(destination_table).prefix_with("IGNORE").from_select(
         sa.inspect(destination_table).columns.keys(),
         sa.select(
             [source_table.country, source_table.vehicle_id, source_table.licence, source_table.build_year]
         ).where(
             sa.or_(
-                sa.cast(source_table.build_year, sa.Integer) < 1940,
-                sa.cast(source_table.build_year, sa.Integer) > 2020)
+                sa.cast(source_table.build_year, sa.Integer) < constants.MIN_YEAR,
+                sa.cast(source_table.build_year, sa.Integer) > constants.MAX_YEAR)
         )
     )
     return stmt
@@ -92,4 +95,8 @@ if __name__ == '__main__':
     vehicles = database.Vehicle
     weirdyears = database.WeirdYears
 
-    session.query(sa.extract('year', sa.cast(vehicles.firstuse, sa.Date))).distinct().all()
+    session.execute(save_weird_years(source_table=vehicles, destination_table=weirdyears))
+    session.commit()
+
+    session.execute(sanitize_build_year(table=vehicles))
+    session.commit()

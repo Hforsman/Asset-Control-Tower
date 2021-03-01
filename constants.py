@@ -19,3 +19,5 @@ CONFIG = {
 }
 
 DATA_FOLDER = "data"
+MIN_YEAR = 1940
+MAX_YEAR = 2020
