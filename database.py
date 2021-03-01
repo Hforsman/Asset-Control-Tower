@@ -1,6 +1,6 @@
 from typing import Any
 
-from sqlalchemy import Column, inspect, Integer, PrimaryKeyConstraint, String
+from sqlalchemy import Column, inspect, Integer, Numeric, PrimaryKeyConstraint, String
 from sqlalchemy.ext.declarative import declarative_base
 
 
@@ -45,6 +45,7 @@ class Vehicle(declarative_base()):
     has_heated_seats = Column(String(255))
     has_leather_alcantara = Column(String(255))
     has_leather_upholstery = Column(String(255))
+    amount_damage_norm = Column(Numeric(10, 9))
 
 
 class Mater(declarative_base()):
@@ -105,6 +106,10 @@ class PistonCup(declarative_base()):
     amount_damage = Column(String(255))
     rank = Column(Integer)
 
+    def __repr__(self):
+        return f"pistoncup(country={self.country}; make={self.make}; model={self.model}; " \
+               f"amount_damage={self.amount_damage}; rank={self.rank})"
+
 
 class WeirdYears(declarative_base()):
     __tablename__ = 'weirdyears'
@@ -115,6 +120,9 @@ class WeirdYears(declarative_base()):
     make = Column(String(255))
     model = Column(String(255))
     build_year = Column(String(255))
+
+    def __repr__(self):
+        return f"weirdyears(country={self.country}; make={self.make}; model={self.model}; build_year={self.build_year})"
 
 
 def initialize_database(engine: Any) -> None:
