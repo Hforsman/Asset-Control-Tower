@@ -9,6 +9,7 @@ import pandas as pd
 import requests
 from sqlalchemy import inspect
 
+import analysis
 import constants
 import database
 import utils
@@ -140,3 +141,5 @@ if __name__ == '__main__':
     # Load data lists into database tables
     insert_into_table(data_list=vehicles, table=vehicle_table, engine=engine)
     insert_into_table(data_list=mater, table=mater_table, engine=engine)
+
+    analysis.run_db_updates(engine)
