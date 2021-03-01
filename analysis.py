@@ -44,6 +44,49 @@ def create_topx_query(session: Type[sessionmaker],
     return top_10
 
 
+def null_empty_string(session: Type[sessionmaker], table: Type[database.declarative_base] = database.Vehicle,
+                      field: Type[Any] = database.Vehicle.amount_damage) -> None:
+    """
+    Fields to be case to Numeric need to be NULL first instead of an empty string because CAST works differently
+    underwater in SELECT than it does in UPDATE queries. The UPDATE query raises a
+    "Incorrect DECIMAL value: '0' for column '' at row -1" error
+    This update uses ORM to immediately run query against the passed session
+
+    :param session: sqlalchemy session object to talk to the database
+    :param table: Database table on which to run the query
+    :param field: Field that needs to NULLed
+    :return: None
+    """
+    session.query(table).filter(field == "").\
+        update({field: sa.null()}, synchronize_session=False)
+
+
+def normalize_amount_damage(table: Type[database.declarative_base] = database.Vehicle) -> sa.sql.Update:
+    """
+    Apply feature normalization on the amount_damage in the vehicles table. In a perfect world this would work
+    regardless of table or field and do all necessary checks.
+
+    :param table: The table against which to run the normalization query
+    :return: A sql statement to update the amount_damage_norm column with normalized amount_damage per country/car
+    """
+    # First compute the minimum and maximum amount damage per country
+    min_max = sa.select([table.country,
+                         sa.case([(sa.func.max(sa.cast(table.amount_damage, sa.Numeric(14, 2))) == 0, 1)],
+                                 else_=sa.func.max(sa.cast(table.amount_damage, sa.Numeric(14, 2)))).label("max_dmg"),
+                         sa.func.min(sa.cast(table.amount_damage, sa.Numeric(14, 2))).label("min_dmg")]).\
+        group_by(table.country).alias("min_max")
+
+    # Second, use the min and max damage to normalize the damage per car per country and store in separate column
+    norm = sa.update(table).\
+        where(min_max.c.country == table.country). \
+        values(amount_damage_norm=(
+            (sa.cast(table.amount_damage, sa.Numeric(14, 2)) - min_max.c.min_dmg) /
+            (sa.case([(min_max.c.max_dmg == 0, 1)], else_=min_max.c.max_dmg) - min_max.c.min_dmg)
+        ))
+
+    return norm
+
+
 def sanitize_build_year(table: Type[database.declarative_base] = database.Vehicle,) -> sa.sql.Update:
     """
     Query to update build_year with the year in firstuse if build_year is lower than 1940 and higher than 2020.
