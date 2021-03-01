@@ -7,9 +7,6 @@ import constants
 import database
 
 
-# TODO: sanitize make
-# TODO: sanitize model
-
 def create_topx_query(session: Type[sessionmaker],
                       table: Type[database.declarative_base] = database.Vehicle,
                       top: int = 10,
@@ -48,6 +45,18 @@ def create_topx_query(session: Type[sessionmaker],
 
 
 def sanitize_build_year(table: Type[database.declarative_base] = database.Vehicle,) -> sa.sql.Update:
+    """
+    Query to update build_year with the year in firstuse if build_year is lower than 1940 and higher than 2020.
+    A quick scna of the data showed that 1940 is approximately the lowest build_year found that looks reasonable
+    compared with firstuse. Somewhere it showed that the data files were created in 2018, therefore 2020 is a bit
+    optimistic.
+    All "years" that fall outside of this range are overwritten with the year of firstuse. If firstuse has a diverging
+    year that is not further remedied because there is not anything to quickly test or check against.
+
+    :param table: The table against which to run the query
+    :return: A sql statement to update the build_year column with the firstuse year
+    """
+
     stmt = sa.update(table).prefix_with("IGNORE").where(sa.or_(
         sa.cast(table.build_year, sa.Integer) < constants.MIN_YEAR,
         sa.cast(table.build_year, sa.Integer) > constants.MAX_YEAR)
