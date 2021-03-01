@@ -136,16 +136,22 @@ def save_weird_years(source_table: Type[database.declarative_base] = database.Ve
     return stmt
 
 
-if __name__ == '__main__':
-    engine = utils.get_db_engine()
+def run_db_updates(engine) -> None:
+    # engine = utils.get_db_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
 
     vehicles = database.Vehicle
     weirdyears = database.WeirdYears
 
-    session.execute(save_weird_years(source_table=vehicles, destination_table=weirdyears))
-    session.commit()
-
-    session.execute(sanitize_build_year(table=vehicles))
-    session.commit()
+    try:
+        session.execute(save_weird_years(source_table=vehicles, destination_table=weirdyears))
+        session.execute(sanitize_build_year(table=vehicles))
+        null_empty_string(session)
+        session.execute(normalize_amount_damage(table=vehicles))
+        session.commit()
+    except:
+        session.rollback()
+        raise
+    finally:
+        session.close()
