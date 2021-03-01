@@ -92,8 +92,8 @@ def split_into_long_and_normal_lists(data_list: List[List[str]], mater: List[Lis
         elif len(row) < 36:
             # explanation on short_row cause and fix in fix_short_row
             row = fix_short_row(row)
-            # All rows with 36 fields can be ap
-        vehicles.append(row)
+            # All rows with 36 fields can be appended to vehicles after receiving an empty column for insertion
+        vehicles.append(row.append(None))
 
     return mater, vehicles
 
