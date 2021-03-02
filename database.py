@@ -1,7 +1,13 @@
-from typing import Any
+from typing import Any, Type
 
-from sqlalchemy import Column, inspect, Integer, Numeric, PrimaryKeyConstraint, String
+from sqlalchemy import inspect
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+import sqlalchemy.sql.expression as sase
+from sqlalchemy.sql.schema import Column, PrimaryKeyConstraint
+from sqlalchemy.sql.sqltypes import Date, Float, Integer, Numeric, String
+
+import constants
 
 
 class Vehicle(declarative_base()):
@@ -46,6 +52,88 @@ class Vehicle(declarative_base()):
     has_leather_alcantara = Column(String(255))
     has_leather_upholstery = Column(String(255))
     amount_damage_norm = Column(Numeric(10, 9))
+
+    @classmethod
+    def create_topx(cls, top: int = 10, filter_on_year: int = 2016) -> sase.select:
+        rank_avg_dmg_year = sase.select([
+                cls.country,
+                cls.make,
+                cls.model,
+                sase.func.avg(sase.cast(cls.amount_damage, Float)).label("avg_dmg"),
+                sase.func.rank().over(
+                    partition_by=cls.country,
+                    order_by=sase.func.avg(sase.cast(cls.amount_damage, Float)).desc()
+                ).label("rank")]) \
+            .where(cls.build_year == str(filter_on_year)) \
+            .where(cls.make != "") \
+            .where(cls.model != "") \
+            .group_by(
+                cls.country,
+                cls.make,
+                cls.model
+        ).alias("rank_dmg")
+
+        return sase.select(rank_avg_dmg_year.columns).where(rank_avg_dmg_year.c.rank <= top).alias("top_x")
+
+    @classmethod
+    def normalize_amount_damage(cls) -> sase.Update:
+        """
+        Apply feature normalization on the amount_damage in the table.
+
+        :return: A sql statement to update the amount_damage_norm column with normalized amount_damage per country/car
+        """
+        # First compute the minimum and maximum amount damage per country
+        min_max = sase.select([
+            cls.country,
+            sase.case([(sase.func.max(sase.cast(cls.amount_damage, Numeric(14, 2))) == 0, 1)],
+                      else_=sase.func.max(sase.cast(cls.amount_damage, Numeric(14, 2)))).label("max_dmg"),
+            sase.func.min(sase.cast(cls.amount_damage, Numeric(14, 2))).label("min_dmg")
+        ]).group_by(cls.country).alias("min_max")
+
+        # Second, use the min and max damage to normalize the damage per car per country and store in separate column
+        norm = sase.update(cls). \
+            where(min_max.c.country == cls.country). \
+            values(amount_damage_norm=(
+                (sase.cast(cls.amount_damage, Numeric(14, 2)) - min_max.c.min_dmg) /
+                (sase.case([(min_max.c.max_dmg == 0, 1)], else_=min_max.c.max_dmg) - min_max.c.min_dmg)
+            ))
+
+        return norm
+
+    @classmethod
+    def null_empty_string(cls, session: Type[sessionmaker], field: Type[Any] = amount_damage) -> None:
+        """
+        Fields to be case to Numeric need to be NULL first instead of an empty string because CAST works differently
+        underwater in SELECT than it does in UPDATE queries. The UPDATE query raises a
+        "Incorrect DECIMAL value: '0' for column '' at row -1" error
+        This update uses ORM to immediately run query against the passed session
+
+        :param session: sqlalchemy session object to talk to the database
+        :param field: Field that needs to NULLed
+        :return: None
+        """
+        session.query(cls).filter(field == "").update({field: sase.null()}, synchronize_session=False)
+
+    @classmethod
+    def sanitize_build_year(cls) -> sase.Update:
+        """
+        Query to update build_year with the year in firstuse if build_year is lower than 1940 and higher than 2020.
+        A quick scna of the data showed that 1940 is approximately the lowest build_year found that looks reasonable
+        compared with firstuse. Somewhere it showed that the data files were created in 2018, therefore 2020 is a bit
+        optimistic.
+        All "years" that fall outside of this range are overwritten with the year of firstuse. If firstuse has a
+        diverging year that is not further remedied because there is not anything to quickly test or check against.
+
+        :return: A sql statement to update the build_year column with the firstuse year
+        """
+
+        stmt = sase.update(cls).prefix_with("IGNORE").where(sase.or_(
+            sase.cast(cls.build_year, Integer) < constants.MIN_YEAR,
+            sase.cast(cls.build_year, Integer) > constants.MAX_YEAR)
+        ).values(
+            build_year=sase.cast(sase.extract('year', sase.cast(cls.firstuse, Date)), String)
+        )
+        return stmt
 
 
 class Mater(declarative_base()):
@@ -123,6 +211,31 @@ class WeirdYears(declarative_base()):
 
     def __repr__(self):
         return f"weirdyears(country={self.country}; make={self.make}; model={self.model}; build_year={self.build_year})"
+
+    @classmethod
+    def save_weird_years(cls, source_table: Type[declarative_base] = Vehicle) -> sase.Insert:
+        """
+        Using sqlalchemy Core because ORM does not have a satisfying solution for INSERT INTO ... SELECT FROM.
+        This function generates the statement to insert weird build_years with accompanying primary keys to a
+        separate table.
+        The `prefix_with("IGNORE")` is to run the query even though some strings cannot be converted to integers.
+        The result is still as expected.
+
+        :param source_table: Main table where all unsanitized data is stored, is. vehicles
+        :return: insert statement object that can be executed against the database
+        """
+
+        stmt = sase.insert(cls).prefix_with("IGNORE").from_select(
+            inspect(cls).columns.keys(),
+            sase.select(
+                [source_table.country, source_table.vehicle_id, source_table.licence, source_table.build_year]
+            ).where(
+                sase.or_(
+                    sase.cast(source_table.build_year, Integer) < constants.MIN_YEAR,
+                    sase.cast(source_table.build_year, Integer) > constants.MAX_YEAR)
+            )
+        )
+        return stmt
 
 
 def initialize_database(engine: Any) -> None:
