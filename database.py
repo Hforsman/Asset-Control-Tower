@@ -101,6 +101,10 @@ class Vehicle(declarative_base()):
         return norm
 
     @classmethod
+    def nr_of_rows(cls):
+        return sase.select([sase.func.count()]).select_from(cls)
+
+    @classmethod
     def null_empty_string(cls, session: Type[sessionmaker], field: Type[Any] = amount_damage) -> None:
         """
         Fields to be case to Numeric need to be NULL first instead of an empty string because CAST works differently
