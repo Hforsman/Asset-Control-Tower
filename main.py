@@ -153,7 +153,7 @@ if __name__ == '__main__':
     # Read csv files into lists
     mater: List[List[str]] = list()
     vehicles: List[List[str]] = list()
-    for file in os.listdir(constants.DATA_FOLDER):  # ['vehicle.csv0002_part_00']:
+    for file in os.listdir(constants.DATA_FOLDER):
         file_vehicle_list = read_data_from_csv(source=os.path.join(constants.DATA_FOLDER, file))
         mater, vehicles = split_into_long_and_normal_lists(file_vehicle_list, mater, vehicles)
 
