@@ -8,6 +8,7 @@ from typing import Any, List, Tuple, Type
 import pandas as pd
 import requests
 from sqlalchemy import inspect
+from sqlalchemy.orm import sessionmaker
 
 import analysis
 import constants
@@ -117,6 +118,26 @@ def insert_into_table(data_list: List[List[str]], table: Type[database.declarati
               if_exists='append',
               index=False)
     print("loaded data into table")
+
+
+def run_db_updates(engine) -> None:
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    vehicles = database.Vehicle
+    weirdyears = database.WeirdYears
+
+    try:
+        session.execute(weirdyears.save_weird_years(source_table=vehicles))
+        session.execute(vehicles.sanitize_build_year())
+        vehicles.null_empty_string(session)
+        session.execute(vehicles.normalize_amount_damage())
+        session.commit()
+    except:
+        session.rollback()
+        raise
+    finally:
+        session.close()
 
 
 if __name__ == '__main__':
