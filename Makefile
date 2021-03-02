@@ -6,6 +6,8 @@ DB_CONTAINER_PORT := 3306
 DB_NAME := ACT
 DB_USER := lightning
 DB_PWD := McQueen95
+PY_CONTAINER_NAME := radiator_springs
+PY_IMAGE_NAME := py-dock
 
 .PHONY: requirements.txt
 requirements.txt: ## update requirements from current environment
@@ -24,13 +26,25 @@ test: ## Run Python tests
 .PHONY: first_run
 first_run: venv pull_mysql_docker docker_network create_database ## Set up the environment
 
-.PHONY: pull_mysql_docker
-pull_mysql_docker: ## Pull the mysql docker from docker hub
-	@docker pull mysql
-
 .PHONY: docker_network
 docker_network: ## Create a custom network to connect mysql command line client against mysql database docker
 	@docker network create -d bridge $(NETWORK)
+
+.PHONY: python_docker
+python_docker: ## Create docker to run this python project in
+	@docker build -t $(PY_IMAGE_NAME) .
+
+.PHONY: python_docker_run
+python_docker_run: ## Run the python docker interactively
+	@docker run -it --rm --network $(NETWORK) --name $(PY_CONTAINER_NAME) $(PY_IMAGE_NAME)
+
+.PHONY: python_run_script
+python_run_script:
+	@docker run -it --rm --network $(NETWORK) --name $(PY_CONTAINER_NAME) $(PY_IMAGE_NAME) venv/bin/python3 main.py
+
+.PHONY: pull_mysql_docker
+pull_mysql_docker: ## Pull the mysql docker from docker hub
+	@docker pull mysql
 
 .PHONY: create_database
 create_database: ## Spin up mysql docker and initialize database
