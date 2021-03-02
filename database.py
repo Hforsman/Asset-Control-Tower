@@ -198,6 +198,14 @@ class PistonCup(declarative_base()):
         return f"pistoncup(country={self.country}; make={self.make}; model={self.model}; " \
                f"amount_damage={self.amount_damage}; rank={self.rank})"
 
+    @classmethod
+    def wipe_slate(cls):
+        return sase.delete(cls).alias("delete_all")
+
+    @classmethod
+    def import_scoreboard(cls, top_x: sase.select) -> sase.insert:
+        return sase.insert(cls).from_select(inspect(cls).columns.keys(), sase.select(top_x.columns))
+
 
 class WeirdYears(declarative_base()):
     __tablename__ = 'weirdyears'
