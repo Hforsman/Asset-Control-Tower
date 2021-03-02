@@ -1,8 +1,8 @@
 PIP := venv/bin/pip
 PYTHON := venv/bin/python
 NETWORK := la_international_speedway
-CONTAINER_NAME := rust_eze
-CONTAINER_PORT := 3306
+DB_CONTAINER_NAME := rust_eze
+DB_CONTAINER_PORT := 3306
 DB_NAME := ACT
 DB_USER := lightning
 DB_PWD := McQueen95
@@ -34,20 +34,20 @@ docker_network: ## Create a custom network to connect mysql command line client 
 
 .PHONY: create_database
 create_database: ## Spin up mysql docker and initialize database
-	@docker run --name=$(CONTAINER_NAME) \
+	@docker run --name=$(DB_CONTAINER_NAME) \
 	--network=$(NETWORK) \
 	-e MYSQL_ROOT_PASSWORD=admin \
 	-e MYSQL_DATABASE=$(DB_NAME) \
 	-e MYSQL_USER=$(DB_USER) \
 	-e MYSQL_PASSWORD=$(DB_PWD) \
-	-p $(CONTAINER_PORT):$(CONTAINER_PORT) \
+	-p $(DB_CONTAINER_PORT):$(DB_CONTAINER_PORT) \
 	-d mysql:latest
 
-.PHONY: remove_container
-remove_container: ## Stop the running container and remove it
-	@docker stop $(CONTAINER_NAME)
-	@docker container rm $(CONTAINER_NAME)
+.PHONY: remove_container_db
+remove_container_db: ## Stop the running container and remove it
+	@docker stop $(DB_CONTAINER_NAME)
+	@docker container rm $(DB_CONTAINER_NAME)
 
 .PHONY: docker_start_db
 docker_start_db: ## Start a stopped db container
-	@docker start $(CONTAINER_NAME)
+	@docker start $(DB_CONTAINER_NAME)
