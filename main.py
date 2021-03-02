@@ -118,23 +118,35 @@ def insert_into_table(data_list: List[List[str]], table: Type[database.declarati
     print("loaded data into table")
 
 
-def run_db_updates(engine) -> None:
+def run_db_updates(engine: Any) -> None:
     Session = sessionmaker(bind=engine)
     session = Session()
 
     vehicles = database.Vehicle
     weirdyears = database.WeirdYears
+    pistoncup = database.PistonCup
 
     try:
+        print("Sanitizing build_year")
         session.execute(weirdyears.save_weird_years(source_table=vehicles))
         session.execute(vehicles.sanitize_build_year())
+
+        print("Change empty string to NULL")
         vehicles.null_empty_string(session)
+
+        print("Calculate normalized damage")
         session.execute(vehicles.normalize_amount_damage())
+
+        print("Storing top 10 avg dmg per make-model per country")
+        top_x = vehicles.create_topx()
+        session.execute(pistoncup.import_scoreboard(top_x))
+
         session.commit()
     except:
         session.rollback()
         raise
     finally:
+        print(f"All update done. Result can be found in table {pistoncup.__table__.name}.")
         session.close()
 
 
