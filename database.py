@@ -223,9 +223,8 @@ class WeirdYears(declarative_base()):
     @classmethod
     def save_weird_years(cls, source_table: Type[declarative_base] = Vehicle) -> sase.Insert:
         """
-        Using sqlalchemy Core because ORM does not have a satisfying solution for INSERT INTO ... SELECT FROM.
-        This function generates the statement to insert weird build_years with accompanying primary keys to a
-        separate table.
+        This function generates the statement to insert weird build_years with accompanying primary keys to
+        this table.
         The `prefix_with("IGNORE")` is to run the query even though some strings cannot be converted to integers.
         The result is still as expected.
 
