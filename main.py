@@ -10,7 +10,6 @@ import requests
 from sqlalchemy import inspect
 from sqlalchemy.orm import sessionmaker
 
-import analysis
 import constants
 import database
 import utils
