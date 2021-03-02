@@ -24,8 +24,6 @@ def download_and_save_gzip_from_url(source: str, destination: str) -> None:
     :return: The name of the
     """
 
-    utils.mkdir(directory=destination)
-
     # Get header to check file type
     h = requests.head(source)
     if h.headers.get("content-type") == "application/x-gzip":
@@ -141,6 +139,7 @@ def run_db_updates(engine) -> None:
 
 if __name__ == '__main__':
     # Download, extract and save the data files to disk
+    utils.mkdir(directory=constants.DATA_FOLDER)
     for file in constants.FILES:
         download_and_save_gzip_from_url(source=file, destination=constants.DATA_FOLDER)
 
