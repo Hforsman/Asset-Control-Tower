@@ -59,10 +59,10 @@ class Vehicle(declarative_base()):
                 cls.country,
                 cls.make,
                 cls.model,
-                sase.func.avg(sase.cast(cls.amount_damage, Float)).label("avg_dmg"),
+                sase.func.avg(sase.cast(cls.amount_damage_norm, Float)).label("avg_dmg"),
                 sase.func.rank().over(
                     partition_by=cls.country,
-                    order_by=sase.func.avg(sase.cast(cls.amount_damage, Float)).desc()
+                    order_by=sase.func.avg(sase.cast(cls.amount_damage_norm, Float)).desc()
                 ).label("rank")]) \
             .where(cls.build_year == str(filter_on_year)) \
             .where(cls.make != "") \
