@@ -25,9 +25,13 @@ def get_db_engine() -> Any:
     db_driver = constants.CONFIG.get("driver")
     db_user = constants.CONFIG.get('user')
     db_pwd = constants.CONFIG.get('password')
-    db_host = constants.CONFIG.get('host')
     db_port = constants.CONFIG.get('port')
     db_name = constants.CONFIG.get('database')
+
+    if "MYSQL_HOST" in os.environ:
+        db_host = os.environ["MYSQL_HOST"]
+    else:
+        db_host = constants.CONFIG.get('host')
 
     conn_string = f"{db_type}+{db_driver}://{db_user}:{db_pwd}@{db_host}:{db_port}/{db_name}"
 
