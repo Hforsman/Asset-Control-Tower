@@ -118,6 +118,21 @@ def insert_into_table(data_list: List[List[str]], table: Type[database.declarati
     print("loaded data into table")
 
 
+def check_db_filled(engine: Any) -> bool:
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    vehicles = database.Vehicle
+
+    cnt = session.execute(vehicles.nr_of_rows())
+    if cnt.scalar() == 0:
+        session.close()
+        return False
+    else:
+        session.close()
+        return True
+
+
 def run_db_updates(engine: Any) -> None:
     Session = sessionmaker(bind=engine)
     session = Session()
@@ -160,18 +175,20 @@ if __name__ == '__main__':
     engine = utils.get_db_engine()
     if not database.is_initialized(engine):
         database.initialize_database(engine)
-    vehicle_table = database.Vehicle
-    mater_table = database.Mater
 
-    # Read csv files into lists
-    mater: List[List[str]] = list()
-    vehicles: List[List[str]] = list()
-    for file in os.listdir(constants.DATA_FOLDER):
-        file_vehicle_list = read_data_from_csv(source=os.path.join(constants.DATA_FOLDER, file))
-        mater, vehicles = split_into_long_and_normal_lists(file_vehicle_list, mater, vehicles)
+    if not check_db_filled(engine):
+        vehicle_table = database.Vehicle
+        mater_table = database.Mater
 
-    # Load data lists into database tables
-    insert_into_table(data_list=vehicles, table=vehicle_table, engine=engine)
-    insert_into_table(data_list=mater, table=mater_table, engine=engine)
+        # Read csv files into lists
+        mater: List[List[str]] = list()
+        vehicles: List[List[str]] = list()
+        for file in os.listdir(constants.DATA_FOLDER):
+            file_vehicle_list = read_data_from_csv(source=os.path.join(constants.DATA_FOLDER, file))
+            mater, vehicles = split_into_long_and_normal_lists(file_vehicle_list, mater, vehicles)
+
+        # Load data lists into database tables
+        insert_into_table(data_list=vehicles, table=vehicle_table, engine=engine)
+        insert_into_table(data_list=mater, table=mater_table, engine=engine)
 
     run_db_updates(engine)
