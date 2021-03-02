@@ -24,7 +24,7 @@ test: ## Run Python tests
 	echo "test"
 
 .PHONY: first_run
-first_run: venv pull_mysql_docker docker_network create_database ## Set up the environment
+first_run: venv pull_mysql_docker docker_network create_database python_docker python_docker_run ## Just run it all
 
 .PHONY: docker_network
 docker_network: ## Create a custom network to connect mysql command line client against mysql database docker
