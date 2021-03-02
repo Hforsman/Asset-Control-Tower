@@ -7,6 +7,10 @@ DB_NAME := ACT
 DB_USER := lightning
 DB_PWD := McQueen95
 
+.PHONY: requirements.txt
+requirements.txt: ## update requirements from current environment
+	pip freeze > requirements.txt
+
 .PHONY: venv
 venv: ## Create a venv to work in
 	rm -rf venv
@@ -18,7 +22,7 @@ test: ## Run Python tests
 	echo "test"
 
 .PHONY: first_run
-first_run: venv pull_mysql_docker create_database ## Set up the environment
+first_run: venv pull_mysql_docker docker_network create_database ## Set up the environment
 
 .PHONY: pull_mysql_docker
 pull_mysql_docker: ## Pull the mysql docker from docker hub
