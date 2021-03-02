@@ -9,6 +9,8 @@ After the data is stored, a series of data manipulation queries sanitize the car
 perform feature normalization on the amount damage column. The normalized damage is stored in a
 separate column.
 
+All data manipulation queries are implemented in sqlalchemy to make the python code as database agnostic as possible.
+
 The database is a MySQL database running in a Docker container. The python script can be run both locally
 and in its own Docker.
 
@@ -19,7 +21,9 @@ and in its own Docker.
 
 ## How to use
 ### How to start
-After you cloned the repo, you can just call `make first_run`. 
+After you cloned the repo, you can just call 
+
+    make first_run
 
 This will (in order) 
 - create a Python3 virtualenv
@@ -33,11 +37,13 @@ Creating the virtualenv is not really necessary in this step, but it allows you 
 If you rather run the python file locally, just edit the make command and remove `python_docker_run` from the end.
 
 ### Removing the mysql container to start fresh
-Run `make remove_container_db`
+Run 
+
+    make remove_container_db
 
 This will stop and remove the database container. To start a fresh one simply run:
 
-`make create_database`
+    make create_database
 
 ## Next steps
 This project can obviously use more work to make it better. Here is just some stuff from the top of my head:
@@ -52,3 +58,4 @@ or have the model including subtypes like engine and wheel size. Between countri
 - A nice, general way to fix data where the csv reader decided to split it up into more fields than the standard 36.
 - For production purposes the username and password need to stored and accessed securely.
 - More subtlety in checking if the database is initialized.
+- Add a different database docker as back-end to test if the data wrangling is actually database agnostic.
