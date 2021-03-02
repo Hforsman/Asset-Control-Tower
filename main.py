@@ -161,4 +161,4 @@ if __name__ == '__main__':
     insert_into_table(data_list=vehicles, table=vehicle_table, engine=engine)
     insert_into_table(data_list=mater, table=mater_table, engine=engine)
 
-    analysis.run_db_updates(engine)
+    run_db_updates(engine)
