@@ -40,6 +40,12 @@ def download_and_save_gzip_from_url(source: str, destination: str) -> None:
 
 
 def read_data_from_csv(source: str) -> List[List[str]]:
+    """
+    Reads in the csv files line by line because some processing needs to be done to make all entries same length.
+
+    :param source: Path to the csv file to be read in
+    :return: a list containing all the rows of the csv as lists
+    """
     data_list = list()
     print(f"Reading csv file {source}")
     with open(source, "r") as f:
@@ -81,6 +87,18 @@ def make_long_enough(row: List[str]) -> List[str]:
 
 def split_into_long_and_normal_lists(data_list: List[List[str]], mater: List[List[str]], vehicles: List[List[str]]) -> \
         Tuple[List[List[str]], List[List[str]]]:
+    """
+    Because the actual data load first changes the data list of list to a pandas DataFrame the length of all rows need
+    to be equal. This function splits rows based on their length into two data sets.
+    The assumption here is that rows of length 36 are read in correctly, shorter rows just have 1 or 2 easily rectified
+    errors and longer rows are kept separate.
+    The 36 long rows are extended with an extra empty field because the destination table has 37 columns.
+
+    :param data_list: new set of data to be split
+    :param mater: the list of rows that are too long
+    :param vehicles: the list of rows with the right number of fields
+    :return: The list of too-long rows and the list of correct length rows
+    """
     for row in data_list:
         if len(row) > 36:
             # Know too little about long_rows to pull erroneous fields together therefore
@@ -99,6 +117,16 @@ def split_into_long_and_normal_lists(data_list: List[List[str]], mater: List[Lis
 
 
 def insert_into_table(data_list: List[List[str]], table: Type[database.declarative_base], engine: Any) -> None:
+    """
+    This function uploads the data into the database, leveraging the power of pandas dataframe for deduplication and
+    talking to the database backend for quick dataload. Duplication is checked on the primary key, duplicate rows are
+    dropped.
+
+    :param data_list: A list containing same length rows (as list) from the 7 different csv's
+    :param table: sqlalchemy declarativeMeta class of the table to upload the data to
+    :param engine: a Sqlalchemy engine object
+    :return: None
+    """
     print(f"Transform data for {table.__table__.name} into dataframe")
 
     df = pd.DataFrame(data=data_list, columns=inspect(table).columns.keys())
@@ -119,6 +147,13 @@ def insert_into_table(data_list: List[List[str]], table: Type[database.declarati
 
 
 def check_db_filled(engine: Any) -> bool:
+    """
+    Check if there is data in the database
+    This is not a very extensive check. But the data load either hasn't been done or is complete
+
+    :param engine: a Sqlalchemy engine object
+    :return: Boolean indicating whether the database contains data or not
+    """
     Session = sessionmaker(bind=engine)
     session = Session()
 
@@ -134,6 +169,12 @@ def check_db_filled(engine: Any) -> bool:
 
 
 def run_db_updates(engine: Any) -> None:
+    """
+    Execute all data transformation queries on the database.
+
+    :param engine: a Sqlalchemy engine object
+    :return: None
+    """
     Session = sessionmaker(bind=engine)
     session = Session()
 
