@@ -154,17 +154,12 @@ def check_db_filled(engine: Any) -> bool:
     :param engine: a Sqlalchemy engine object
     :return: Boolean indicating whether the database contains data or not
     """
-    Session = sessionmaker(bind=engine)
-    session = Session()
-
     vehicles = database.Vehicle
 
-    cnt = session.execute(vehicles.nr_of_rows())
+    cnt = engine.execute(vehicles.nr_of_rows())
     if cnt.scalar() == 0:
-        session.close()
         return False
     else:
-        session.close()
         return True
 
 
