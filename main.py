@@ -80,7 +80,7 @@ def make_long_enough(row: List[str]) -> List[str]:
         row = row[:40]
     else:
         for i in range(40-len(row)):
-            row.append("")
+            row.append(None)
 
     return row
 
