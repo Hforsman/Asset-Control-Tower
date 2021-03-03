@@ -133,7 +133,7 @@ def insert_into_table(data_list: List[List[str]], table: Type[database.declarati
     pre_size = len(df.index)
     print(f"Created dataframe with {pre_size} rows")
 
-    df.drop_duplicates(subset=[key.name for key in inspect(vehicle_table).primary_key], inplace=True)
+    df.drop_duplicates(subset=[key.name for key in inspect(table).primary_key], inplace=True)
     unique_size = len(df.index)
     print(f"Dataframa contains {unique_size} unique primary key entries")
     print(f"Dropped {pre_size - unique_size} non-unique primary key entries")
