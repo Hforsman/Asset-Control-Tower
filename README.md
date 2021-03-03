@@ -59,3 +59,4 @@ or have the model including subtypes like engine and wheel size. Between countri
 - For production purposes the username and password need to stored and accessed securely.
 - More subtlety in checking if the database is initialized.
 - Add a different database docker as back-end to test if the data wrangling is actually database agnostic.
+- Use `mock` to mock a table class in the tests to make the tests easier...
