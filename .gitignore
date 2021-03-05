@@ -133,6 +133,7 @@ dmypy.json
 
 # non-text files
 *.pdf
+*.odp
 
 # data files
 data/
