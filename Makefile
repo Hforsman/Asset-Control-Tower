@@ -30,6 +30,10 @@ first_run: venv pull_mysql_docker docker_network create_database python_docker p
 docker_network: ## Create a custom network to connect mysql command line client against mysql database docker
 	@docker network create -d bridge $(NETWORK)
 
+.PHONY: docker_remove_network
+docker_remove_network: ## remove the custom network
+	@docker network rm $(NETWORK)
+
 .PHONY: python_docker
 python_docker: ## Create docker to run this python project in
 	@docker build -t $(PY_IMAGE_NAME) .
