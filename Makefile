@@ -24,7 +24,7 @@ test: ## Run Python tests
 	echo "test"
 
 .PHONY: first_run
-first_run: venv pull_mysql_docker docker_network create_database python_docker python_docker_run ## Just run it all
+first_run: pull_mysql_docker docker_network create_database_docker python_docker python_docker_run ## Just run it all
 
 .PHONY: docker_network
 docker_network: ## Create a custom network to connect mysql command line client against mysql database docker
@@ -46,12 +46,17 @@ python_docker_run: ## Run the python docker interactively
 python_run_script:
 	@docker run -it --rm --network $(NETWORK) --name $(PY_CONTAINER_NAME) $(PY_IMAGE_NAME) venv/bin/python3 main.py
 
+.PHONY: python_docker_rm
+python_docker_rm:
+	@docker stop $(PY_CONTAINER_NAME)
+	@docker container rm $(PY_CONTAINER_NAME)
+
 .PHONY: pull_mysql_docker
 pull_mysql_docker: ## Pull the mysql docker from docker hub
 	@docker pull mysql
 
-.PHONY: create_database
-create_database: ## Spin up mysql docker and initialize database
+.PHONY: create_database_docker
+create_database_docker: ## Spin up mysql docker and initialize database
 	@docker run --name=$(DB_CONTAINER_NAME) \
 	--network=$(NETWORK) \
 	-e MYSQL_ROOT_PASSWORD=admin \
@@ -61,11 +66,14 @@ create_database: ## Spin up mysql docker and initialize database
 	-p $(DB_CONTAINER_PORT):$(DB_CONTAINER_PORT) \
 	-d mysql:latest
 
-.PHONY: remove_container_db
-remove_container_db: ## Stop the running container and remove it
+.PHONY: remove_database_docker
+remove_database_docker: ## Stop the running container and remove it
 	@docker stop $(DB_CONTAINER_NAME)
 	@docker container rm $(DB_CONTAINER_NAME)
 
-.PHONY: docker_start_db
-docker_start_db: ## Start a stopped db container
+.PHONY: start_database_docker
+start_database_docker: ## Start a stopped db container
 	@docker start $(DB_CONTAINER_NAME)
+
+.PHONY: clean
+clean: remove_database_docker python_docker_rm docker_remove_network
