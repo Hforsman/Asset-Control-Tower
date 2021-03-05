@@ -25,16 +25,24 @@ After you cloned the repo, you can just call
 
     make first_run
 
-This will (in order) 
-- create a Python3 virtualenv
+This will (in order)
 - pull the latest MySQL docker from dockerhub
 - create a custom Docker network
 - launch a MySQL container attached to the custom network
 - build a Python3.8 image with all python files, requirements file and Makefile
-- run a Python3.8 container that executes main.py
+- run a Python3.8 container that runs `test_all.py`
 
-Creating the virtualenv is not really necessary in this step, but it allows you to more easily run the code locally.
-If you rather run the python file locally, just edit the make command and remove `python_docker_run` from the end.
+### tests
+The test are supposed to throw 1 error so there is nothing to worry about when you see this:
+
+    FAILED test_all.py::test_fix_short_row_incorrect - AssertionError: assert 35 == 36
+
+### Next
+When the tests have run as expected, perform the command
+
+    make python_run_script
+This will start the python script `main.py` that will get all the data, load it into the database and run the 
+transformations. It will take a while though...
 
 ### Removing the mysql container to start fresh
 Run 
