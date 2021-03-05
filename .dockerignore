@@ -1,0 +1,8 @@
+'Carnext Recruitment Data Engineering case (1).pdf'
+data
+.git
+.gitignore
+.idea
+__pycache__
+.pytest_cache
+venv
