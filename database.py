@@ -63,7 +63,7 @@ class Vehicle(declarative_base()):
                 sase.func.rank().over(
                     partition_by=cls.country,
                     order_by=sase.func.avg(sase.cast(cls.amount_damage_norm, Float)).desc()
-                ).label("rank")]) \
+                ).label("rnk")]) \
             .where(cls.build_year == str(filter_on_year)) \
             .where(cls.make != "") \
             .where(cls.model != "") \
@@ -73,7 +73,7 @@ class Vehicle(declarative_base()):
                 cls.model
         ).alias("rank_dmg")
 
-        return sase.select(rank_avg_dmg_year.columns).where(rank_avg_dmg_year.c.rank <= top).alias("top_x")
+        return sase.select(rank_avg_dmg_year.columns).where(rank_avg_dmg_year.c.rnk <= top).alias("top_x")
 
     @classmethod
     def normalize_amount_damage(cls) -> sase.Update:
@@ -196,11 +196,11 @@ class PistonCup(declarative_base()):
     make = Column(String(255))
     model = Column(String(255))
     amount_damage = Column(String(255))
-    rank = Column(Integer)
+    rnk = Column(Integer)
 
     def __repr__(self):
         return f"pistoncup(country={self.country}; make={self.make}; model={self.model}; " \
-               f"amount_damage={self.amount_damage}; rank={self.rank})"
+               f"amount_damage={self.amount_damage}; rank={self.rnk})"
 
     @classmethod
     def wipe_slate(cls):
