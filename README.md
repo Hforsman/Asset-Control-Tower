@@ -44,6 +44,16 @@ When the tests have run as expected, perform the command
 This will start the python script `main.py` that will get all the data, load it into the database and run the 
 transformations. It will take a while though...
 
+The next step is to get the result from the database.
+    
+    make enter_database
+This will start a separate mysql instance with the command line interface. Then run the query:
+
+    select * from ACT.pistoncup order by country, rnk DESC;
+The results will display "nicely" formatted on the command line.
+
+Of course it is possible to set up a connection to a GUI like DBeaver to `localhost:3306`.
+
 ### Removing the mysql container to start fresh
 Run 
 
