@@ -46,11 +46,6 @@ python_docker_run: ## Run the python docker interactively
 python_run_script:
 	@docker run -it --rm --network $(NETWORK) --name $(PY_CONTAINER_NAME) $(PY_IMAGE_NAME) venv/bin/python3 main.py
 
-.PHONY: python_docker_rm
-python_docker_rm:
-	@docker stop $(PY_CONTAINER_NAME)
-	@docker container rm $(PY_CONTAINER_NAME)
-
 .PHONY: pull_mysql_docker
 pull_mysql_docker: ## Pull the mysql docker from docker hub
 	@docker pull mysql
@@ -76,4 +71,4 @@ start_database_docker: ## Start a stopped db container
 	@docker start $(DB_CONTAINER_NAME)
 
 .PHONY: clean
-clean: remove_database_docker python_docker_rm docker_remove_network
+clean: remove_database_docker docker_remove_network
