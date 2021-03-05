@@ -111,7 +111,7 @@ def test_insert_into_table():
         test_short.append(row[:3])
     test_short.append(test_short[6])
 
-    main.insert_into_table(data_list=test_short, table=Test_table, engine=engine)
+    main.insert_into_table(data_list=test_short, table=Temp_table, engine=engine)
 
     length = engine.execute("SELECT COUNT(*) FROM test_table").scalar()
     Temp_table.__table__.drop(bind=engine)
