@@ -70,5 +70,9 @@ remove_database_docker: ## Stop the running container and remove it
 start_database_docker: ## Start a stopped db container
 	@docker start $(DB_CONTAINER_NAME)
 
+.PHONY: enter_database
+enter_database: ## This command starts up a separate mysql instance with the command line client
+	@docker run -it --network la_international_speedway --rm mysql mysql -hrust_eze -ulightning -pMcQueen95
+
 .PHONY: clean
 clean: remove_database_docker docker_remove_network
