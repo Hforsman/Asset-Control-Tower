@@ -205,7 +205,7 @@ class PistonCup(declarative_base()):
 
     @classmethod
     def wipe_slate(cls):
-        return sase.delete(cls).alias("delete_all")
+        return sase.delete(cls)
 
     @classmethod
     def import_scoreboard(cls, top_x: sase.select) -> sase.insert:
