@@ -1,7 +1,6 @@
 import os
 
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql.schema import Column, PrimaryKeyConstraint
 from sqlalchemy.sql.sqltypes import String
 
