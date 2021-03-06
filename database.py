@@ -67,6 +67,7 @@ class Vehicle(declarative_base()):
             .where(cls.build_year == str(filter_on_year)) \
             .where(cls.make != "") \
             .where(cls.model != "") \
+            .where(cls.amount_damage_norm != sase.null) \
             .group_by(
                 cls.country,
                 cls.make,
