@@ -5,7 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import sqlalchemy.sql.expression as sase
 from sqlalchemy.sql.schema import Column, PrimaryKeyConstraint
-from sqlalchemy.sql.sqltypes import Date, Float, Integer, Numeric, String
+from sqlalchemy.sql.sqltypes import Date, Integer, Numeric, String
 
 import constants
 
