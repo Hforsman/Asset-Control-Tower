@@ -49,7 +49,7 @@ The next step is to get the result from the database.
     make enter_database
 This will start a separate mysql instance with the command line interface. Then run the query:
 
-    select * from ACT.pistoncup order by country, rnk DESC;
+    select * from ACT.pistoncup order by country, rnk ASC;
 The results will display "nicely" formatted on the command line.
 
 Of course it is possible to set up a connection to a GUI like DBeaver to `localhost:3306`.
